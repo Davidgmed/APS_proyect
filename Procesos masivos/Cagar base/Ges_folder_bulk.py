@@ -100,7 +100,13 @@ def procesar_lote_ges(files_lote, lote_index, temp_csv_path):
         data.columns = data.columns.str.strip().str.replace(r'\s+', ' ', regex=True)
 
         # Limpieza de campos clave
-        data['RUN'] = data['RUN'].astype(str).str.replace(r'\D', '', regex=True)
+        data['RUN'] = (
+            data['RUN']
+            .astype(str)
+            .str.strip()
+            .str.replace(r'\.0$', '', regex=True)  # quita el ".0" final típico de los floats
+            .str.replace(r'\D', '', regex=True)  # luego elimina lo no numérico
+        )
         data['DV'] = data['DV'].astype(str).str.replace(r'[^0-9Kk]', '', regex=True).str.upper()
         data['DV'] = data['DV'].replace({'': 'null', 'nan': 'null'})
 

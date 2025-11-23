@@ -22,6 +22,7 @@ def crear_tabla_si_no_existe():
             cursor = conn.cursor()
 
             # Verificar existencia de la tabla
+
             cursor.execute("""
                 SELECT COUNT(*) 
                 FROM INFORMATION_SCHEMA.TABLES 

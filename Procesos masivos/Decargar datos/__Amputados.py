@@ -10,23 +10,49 @@ import numpy as np
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime, timedelta
+import sys
+from selenium.common.exceptions import TimeoutException
+
+# --- Recibir fechas desde argumentos ---
+#if len(sys.argv) != 3:
+#    print("Uso: script.py <fecha_inicio> <fecha_fin>")
+#    sys.exit(1)
+#
+#fecha_inicio = sys.argv[1]
+#fecha_fin = sys.argv[2]
+#
+#print(f"Usando fechas: {fecha_inicio} - {fecha_fin}")
+
+fecha_inicio = "10/11/2025"
+fecha_fin = "16/11/2025"
+
+print(f"Usando fechas: {fecha_inicio} - {fecha_fin}")
 
 # --- Configuración del directorio de descargas ---
-download_dir = r"G:\Mi unidad\ECICEP\descompensados"
+download_dir = r"G:\Mi unidad\Respiratorias\Descarga"
 if not os.path.exists(download_dir):
     os.makedirs(download_dir)
 
 # Configuración del driver con opciones para establecer el directorio de descargas
 options = webdriver.ChromeOptions()
+
 prefs = {
     "download.default_directory": download_dir,
     "download.prompt_for_download": False,
     "download.directory_upgrade": True,
     "safebrowsing.enabled": True,
+    # Desactiva el gestor de contraseñas y el pop-up
     "credentials_enable_service": False,
     "profile.password_manager_enabled": False
 }
 options.add_experimental_option("prefs", prefs)
+
+# Opciones para evitar pop-ups y automatización
+options.add_argument("--disable-blink-features=AutomationControlled")
+options.add_argument("--disable-save-password-bubble")
+options.add_argument("--disable-infobars")
+options.add_argument("--disable-notifications")
+
 driver = webdriver.Chrome(options=options)
 
 # --- Configuración de fechas ---
@@ -40,7 +66,7 @@ scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/au
 credentials = ServiceAccountCredentials.from_json_keyfile_name(
     r'G:\Mi unidad\quantum-balm-400521-65b53594e910.json', scope)
 client = gspread.authorize(credentials)
-spreadsheet = client.open("Casos glicemia descompensada")
+spreadsheet = client.open("Casos respiratorios red de urgencia 2025")
 
 # Diccionario de asignación de establecimientos a sectores
 establishment_to_sector = {
@@ -86,34 +112,45 @@ password_input.clear()
 #password_input.send_keys("David.2025")
 password_input.send_keys("Ignavi24")
 
+
 # Clic en "Ingresar"
 ingresar_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[contains(text(),'Ingresar')]")))
 time.sleep(1)
 ingresar_button.click()
-time.sleep(1)
+time.sleep(5)
 
 # Seleccionar licencia
-select_div = wait.until(EC.element_to_be_clickable(
-    (By.XPATH, "//div[@id='mui-component-select-licenseIdSelected' and contains(text(),'Seleccionar')]")
-))
-time.sleep(1)
-select_div.click()
-time.sleep(1)
+#select_div = wait.until(EC.element_to_be_clickable(
+#    (By.XPATH, "//div[@id='mui-component-select-licenseIdSelected' and contains(text(),'Seleccionar')]")
+#))
+#time.sleep(5)
+#select_div.click()
+#time.sleep(1)
 
 
-menu_item = wait.until(EC.element_to_be_clickable(
-    (By.XPATH,
+#menu_item = wait.until(EC.element_to_be_clickable(
+#    (By.XPATH,
     #"//li[@data-value='1130' and contains(.,'SAPU Condores de Chile S.S. Metropolitano Sur')]")
-    "//li[@data-value='1139' and contains(.,'Centro de Salud Familiar Santa Laura S.S. Metropolitano Sur')]")
-))
-time.sleep(1)
-menu_item.click()
-time.sleep(2)
+#    "//li[@data-value='1139' and contains(.,'Centro de Salud Familiar Santa Laura S.S. Metropolitano Sur')]")
+#))
+#time.sleep(1)
+#menu_item.click()
+#time.sleep(2)
 
-confirmar_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[contains(text(),'Confirmar')]")))
-confirmar_button.click()
+#confirmar_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[contains(text(),'Confirmar')]")))
+#confirmar_button.click()
 
-time.sleep(10)
+time.sleep(20)
+
+def modificar_fechas(driver, wait, nombre_campo, valor):
+    # Espera a que el elemento con el atributo name igual a nombre_campo sea visible
+    input_element = wait.until(EC.visibility_of_element_located((By.NAME, nombre_campo)))
+    # Utiliza execute_script para asignar el nuevo valor al input
+    driver.execute_script(
+        "document.querySelector('input[name=\"{}\"]').setAttribute('value', arguments[0]);".format(nombre_campo),
+        valor
+    )
+
 
 # --- Función para modificar el campo "txt3" ---
 def modificar_nombre_centro(driver, wait, centro_info):
@@ -142,23 +179,50 @@ for centro_info in centros:
 
     # Abrir nueva pestaña y ejecutar la descarga
     driver.execute_script(
-        "window.open('https://www.iris-salud.cl/ReportPortal/sql/queryView.aspx?reportId=677', '_blank');")
+        "window.open('https://www.iris-salud.cl/ReportPortal/sql/queryView.aspx?reportId=2522', '_blank');")
     driver.switch_to.window(driver.window_handles[-1])
 
     # Completar fechas y demás acciones...
-    fecha_inicio = wait.until(EC.presence_of_element_located((By.ID, "txt4")))
-    fecha_inicio.clear()
-    fecha_inicio.send_keys("30/06/2025")
+    modificar_fechas(driver, wait, "txt4", fecha_inicio)
+    driver.find_element(By.TAG_NAME, "body").send_keys(Keys.ESCAPE)
+    modificar_fechas(driver, wait, "txt5", fecha_fin)
     driver.find_element(By.TAG_NAME, "body").send_keys(Keys.ESCAPE)
 
-    fecha_fin = wait.until(EC.presence_of_element_located((By.ID, "txt5")))
-    fecha_fin.clear()
-    fecha_fin.send_keys("06/07/2025")
+    # Enviar Escape adicional para cerrar posibles overlays (por ejemplo, un datepicker abierto)
     driver.find_element(By.TAG_NAME, "body").send_keys(Keys.ESCAPE)
+
+    # Marcar checkbox principal
+    checkbox = wait.until(
+        EC.element_to_be_clickable((By.ID, "txt7"))
+    )
+    checkbox.click()
+
+    # Situación
+    select_element = wait.until(
+        EC.presence_of_element_located((By.NAME, "txt9"))
+    )
+    select = Select(select_element)
+    select.select_by_value("1")
+
+    # Inscripción
+    select_element = wait.until(
+        EC.presence_of_element_located((By.NAME, "txt10"))
+    )
+    select = Select(select_element)
+    select.select_by_value("1")
 
     time.sleep(2)
     modificar_nombre_centro(driver, wait, centro_info)
     time.sleep(2)
+
+    # Seleccionar tipo/programa en txt6
+    select_element = wait.until(
+        EC.element_to_be_clickable((By.NAME, "txt6"))
+    )
+    dropdown = Select(select_element)
+    dropdown.select_by_value("818")
+
+    time.sleep(5)
 
     # Generar reporte y exportar a Excel
     button = wait.until(EC.element_to_be_clickable((By.XPATH, "//input[@type='button' and @value='Ver Reporte']")))

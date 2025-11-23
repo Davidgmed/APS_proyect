@@ -120,6 +120,9 @@ def procesar_lote_hba1c(files_lote, lote_index, temp_csv_path):
         # 1. Limpieza de nombres de columnas
         data.columns = data.columns.str.strip().str.replace(r'\s+', ' ', regex=True)
 
+        if 'TIPO IDENTIFICACION' in data.columns:
+            data.rename(columns={'NUMERO TIPO IDENTIFICACION': 'RUT'}, inplace=True)
+
         # 2. Combinar RUT y DV en un solo campo "RUT"
         #    (convirtiendo a str para evitar problemas con float)
         if 'DV' in data.columns:

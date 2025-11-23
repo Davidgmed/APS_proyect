@@ -105,8 +105,9 @@ def procesar_lote_policonsultantes(files_lote, lote_index, temp_csv_path):
         data['RUN'] = (
             data['RUN']
             .astype(str)
-            .str.replace(r'\D', '', regex=True)
-            .str.slice(0, -1)  # quita el último carácter
+            .str.strip()
+            .str.replace(r'\.0$', '', regex=True)  # quita el ".0" final típico de los floats
+            .str.replace(r'\D', '', regex=True)  # luego elimina lo no numérico
         )
         data['DV'] = data['DV'].astype(str).str.replace(r'[^0-9Kk]', '', regex=True).str.upper()
 

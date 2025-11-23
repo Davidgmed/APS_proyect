@@ -19,8 +19,8 @@ import sys
 #
 #print(f"Usando fechas: {fecha_inicio} - {fecha_fin}")
 
-fecha_inicio = "15/09/2025"
-fecha_fin = "21/09/2025"
+fecha_inicio = "10/11/2025"
+fecha_fin = "16/11/2025"
 
 print(f"Usando fechas: {fecha_inicio} - {fecha_fin}")
 

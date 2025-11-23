@@ -18,8 +18,8 @@ import sys
 #
 #print(f"Usando fechas: {fecha_inicio} - {fecha_fin}")
 
-fecha_inicio = "15/09/2025"
-fecha_fin = "21/09/2025"
+fecha_inicio = "10/11/2025"
+fecha_fin = "16/11/2025"
 
 
 # --- Configuración del directorio de descargas ---
@@ -44,7 +44,7 @@ driver = webdriver.Chrome(options=options)
 
 # --- Inicio de sesión en la página ---
 driver.get("https://iris.rayenaps.cl/")
-wait = WebDriverWait(driver, 20)
+wait = WebDriverWait(driver, 150)
 time.sleep(10)
 
 # Ingresar usuario
@@ -106,8 +106,8 @@ def modificar_nombre_centro(driver, wait, nombre_campo, valor):
 # --- Variables ---
 
 reportes = [
-         {"url": "https://www.iris-salud.cl/ReportPortal/sql/queryView.aspx?reportId=677", "set" : "urgencias"},
-         {"url": "https://www.iris-salud.cl/ReportPortal/sql/queryView.aspx?reportId=1110","set" : "urgencias"},
+         {"url": "https://www.iris-salud.cl/ReportPortal/sql/queryView.aspx?reportId=677", "set" : "urgencias"}, #ATENCIONES
+         {"url": "https://www.iris-salud.cl/ReportPortal/sql/queryView.aspx?reportId=1110","set" : "urgencias"}, #HEMOGLUCO
          {"url": "https://www.iris-salud.cl/ReportPortal/sql/queryView.aspx?reportId=673","set" : "urgencias"}, # TIEMPOS
          {"url": "https://www.iris-salud.cl/ReportPortal/sql/queryView.aspx?reportId=520", "set" : "urgencias"}, #ADMITIDOS
          {"url": "https://www.iris-salud.cl/ReportPortal/sql/queryView.aspx?reportId=810","set" : "urgencias"} #GES
@@ -149,14 +149,14 @@ for reporte in reportes:  # Cambiar nombre de variable set -> reporte
             # Registro de archivos previos
             archivos_previos = set(os.listdir(download_dir))
 
-            time.sleep(5)
+            time.sleep(30)
 
             # Configurar fechas
             modificar_fechas(driver, wait, "txt4", fecha_inicio)
             modificar_fechas(driver, wait, "txt5", fecha_fin)
 
             # Antes de llamar a modificar_nombre_centro, agregar:
-            WebDriverWait(driver, 15).until(
+            WebDriverWait(driver, 3000).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, "input[name='txt3']"))
             )
 
@@ -164,7 +164,7 @@ for reporte in reportes:  # Cambiar nombre de variable set -> reporte
             modificar_nombre_centro(driver, wait, "txt3", nombre_centro)
 
             # Esperar a que se actualicen los posibles elementos dependientes
-            WebDriverWait(driver, 5).until(
+            WebDriverWait(driver, 3000).until(
                 EC.invisibility_of_element_located((By.CSS_SELECTOR, ".loading-indicator"))
             )
 
@@ -184,7 +184,7 @@ for reporte in reportes:  # Cambiar nombre de variable set -> reporte
             menu_item_excel.click()
 
             # Espera activa para detectar el nuevo archivo .xlsx
-            timeout = 600  # segundos de espera máxima
+            timeout = 3000  # segundos de espera máxima
             elapsed = 0
             nuevo_archivo = None
             while elapsed < timeout:

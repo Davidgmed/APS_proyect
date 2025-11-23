@@ -23,10 +23,10 @@ print(f"📅 Fecha fin: {fecha_fin_str}")
 
 
 scripts = [
-    #"Atenciones_respiratorias.py",
-    #"Actividades_newIris.py",
+    "Atenciones_respiratorias.py",
+    "Actividades_newIris.py",
     "Glicosiladas_newIris.py",
-    #"SaludMental_newIris.py",
+    #"__SaludMental_newIris.py",
     "Urgencia_newIris.py",
     "Urgencia_newIris_poli.py"
 ]

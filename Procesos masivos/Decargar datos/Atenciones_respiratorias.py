@@ -23,13 +23,10 @@ from selenium.common.exceptions import TimeoutException
 #
 #print(f"Usando fechas: {fecha_inicio} - {fecha_fin}")
 
-fecha_inicio_str = "15/09/2025"
-fecha_fin_str = "21/09/2025"
+fecha_inicio = "10/11/2025"
+fecha_fin = "16/11/2025"
 
-
-
-
-print(f"Usando fechas: {fecha_inicio_str} - {fecha_fin_str}")
+print(f"Usando fechas: {fecha_inicio} - {fecha_fin}")
 
 # --- Configuración del directorio de descargas ---
 download_dir = r"G:\Mi unidad\Respiratorias\Descarga"
@@ -69,7 +66,7 @@ scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/au
 credentials = ServiceAccountCredentials.from_json_keyfile_name(
     r'G:\Mi unidad\quantum-balm-400521-65b53594e910.json', scope)
 client = gspread.authorize(credentials)
-spreadsheet = client.open("Casos respiratorios red de urgencia 2024")
+spreadsheet = client.open("Casos respiratorios red de urgencia 2025")
 
 # Diccionario de asignación de establecimientos a sectores
 establishment_to_sector = {
@@ -115,6 +112,7 @@ password_input.clear()
 #password_input.send_keys("David.2025")
 password_input.send_keys("Ignavi24")
 
+
 # Clic en "Ingresar"
 ingresar_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[contains(text(),'Ingresar')]")))
 time.sleep(1)
@@ -143,6 +141,16 @@ time.sleep(5)
 #confirmar_button.click()
 
 time.sleep(20)
+
+def modificar_fechas(driver, wait, nombre_campo, valor):
+    # Espera a que el elemento con el atributo name igual a nombre_campo sea visible
+    input_element = wait.until(EC.visibility_of_element_located((By.NAME, nombre_campo)))
+    # Utiliza execute_script para asignar el nuevo valor al input
+    driver.execute_script(
+        "document.querySelector('input[name=\"{}\"]').setAttribute('value', arguments[0]);".format(nombre_campo),
+        valor
+    )
+
 
 # --- Función para modificar el campo "txt3" ---
 def modificar_nombre_centro(driver, wait, centro_info):
@@ -175,14 +183,9 @@ for centro_info in centros:
     driver.switch_to.window(driver.window_handles[-1])
 
     # Completar fechas y demás acciones...
-    fecha_inicio = wait.until(EC.presence_of_element_located((By.ID, "txt4")))
-    fecha_inicio.clear()
-    fecha_inicio.send_keys(fecha_inicio_str)
+    modificar_fechas(driver, wait, "txt4", fecha_inicio)
     driver.find_element(By.TAG_NAME, "body").send_keys(Keys.ESCAPE)
-
-    fecha_fin = wait.until(EC.presence_of_element_located((By.ID, "txt5")))
-    fecha_fin.clear()
-    fecha_fin.send_keys(fecha_fin_str)
+    modificar_fechas(driver, wait, "txt5", fecha_fin)
     driver.find_element(By.TAG_NAME, "body").send_keys(Keys.ESCAPE)
 
     time.sleep(2)

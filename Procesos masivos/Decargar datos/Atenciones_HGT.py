@@ -26,10 +26,18 @@ from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 
+
+
+fecha_inicio = "10/11/2025"
+fecha_fin = "16/11/2025"
+
+print(f"Usando fechas: {fecha_inicio} - {fecha_fin}")
+
+
 # ============================ CONFIGURACIÓN BÁSICA ============================
 
 # --- Configuración del directorio de descargas ---
-download_dir = r"G:\Mi unidad\ECICEP\descompensados"
+download_dir = r"C:\Users\Quantum-Malloco\Downloads\Descompensados"
 if not os.path.exists(download_dir):
     os.makedirs(download_dir)
 
@@ -111,7 +119,6 @@ time.sleep(1)
 
 menu_item = wait.until(EC.element_to_be_clickable(
     (By.XPATH,
-    #"//li[@data-value='1130' and contains(.,'SAPU Condores de Chile S.S. Metropolitano Sur')]")
     "//li[@data-value='1139' and contains(.,'Centro de Salud Familiar Santa Laura S.S. Metropolitano Sur')]")
 ))
 time.sleep(1)
@@ -149,18 +156,18 @@ for centro_info in centros:
 
     # Abrir nueva pestaña y ejecutar la descarga
     driver.execute_script(
-        "window.open('https://www.iris-salud.cl/ReportPortal/sql/queryView.aspx?reportId=677', '_blank');")
+        "window.open('https://www.iris-salud.cl/ReportPortal/sql/queryView.aspx?reportId=1110', '_blank');")
     driver.switch_to.window(driver.window_handles[-1])
 
     # Completar fechas y demás acciones...
-    fecha_inicio = wait.until(EC.presence_of_element_located((By.ID, "txt4")))
-    fecha_inicio.clear()
-    fecha_inicio.send_keys("30/06/2025")
+    inicio = wait.until(EC.presence_of_element_located((By.ID, "txt4")))
+    inicio.clear()
+    inicio.send_keys(fecha_inicio)
     driver.find_element(By.TAG_NAME, "body").send_keys(Keys.ESCAPE)
 
-    fecha_fin = wait.until(EC.presence_of_element_located((By.ID, "txt5")))
-    fecha_fin.clear()
-    fecha_fin.send_keys("06/07/2025")
+    fin = wait.until(EC.presence_of_element_located((By.ID, "txt5")))
+    fin.clear()
+    fin.send_keys(fecha_fin)
     driver.find_element(By.TAG_NAME, "body").send_keys(Keys.ESCAPE)
 
     time.sleep(2)
@@ -364,34 +371,61 @@ df_max = consolidate_and_pick_max(dfs_validas)
 # --- Preparar DataFrame final con columnas solicitadas ---
 df_out = build_output(df_max)
 
+# ============================================================
+#   APLICAR NUEVOS REQUERIMIENTOS (FECHAS, FILTRO, RUT, ORDEN)
+# ============================================================
+
+# 1) Convertir Valor a numérico y filtrar >= 200
+df_out['Valor'] = pd.to_numeric(df_out['Valor'], errors='coerce')
+df_out = df_out[df_out['Valor'] >= 200].copy()
+
+# 2) Normalizar Fecha HGT a formato dd-mm-YYYY
+df_out['Fecha'] = pd.to_datetime(df_out['Fecha'], errors='coerce', dayfirst=True)
+df_out['Fecha'] = df_out['Fecha'].dt.strftime("%d-%m-%Y")
+
+# 3) Agregar columna con la fecha de carga (dd-mm-YYYY)
+df_out['FechaCarga'] = fecha_actual.strftime("%d-%m-%Y")
+
+# 4) Columna Centro de Atención (usa el mapeo si existe, si no deja el nombre original)
+df_out['CentroAtencion'] = df_out['ESTABLECIMIENTO DE INSCRIPCION'].apply(
+    lambda est: ESTABLISHMENT_TO_SHEET.get(est, est)
+)
+
+# 5) Crear columna RUT unificado (RUN-DV)
+df_out['RUT'] = df_out['RUN'].astype(str).str.strip() + "-" + df_out['DV'].astype(str).str.strip()
+
+# 6) Definir orden final de columnas solicitado
+COLUMNAS_SALIDA = [
+    'FechaCarga',       # Fecha de carga
+    'CentroAtencion',   # Centro de atención
+    'Sector',           # Sector
+    'Nombre',
+    'PrimerAp',
+    'SegundoAp',
+    'RUT',              # RUN-DV
+    'Fecha',            # Fecha HGT
+    'Valor'             # Valor HGT
+]
+
 # --- Escribir por ESTABLECIMIENTO DE INSCRIPCION usando la clasificación ---
 total_escritos = 0
 
 # 1) Mapeables (van a la hoja/sector correspondiente)
 for est, hoja in ESTABLISHMENT_TO_SHEET.items():
-    block = df_out[df_out['ESTABLECIMIENTO DE INSCRIPCION'] == est].drop(columns=['ESTABLECIMIENTO DE INSCRIPCION'])
+    block = df_out[df_out['ESTABLECIMIENTO DE INSCRIPCION'] == est]
     if not block.empty:
-        block = block[['Nombre', 'PrimerAp', 'SegundoAp', 'RUN', 'DV', 'Sector', 'Fecha', 'Valor']]
+        block = block[COLUMNAS_SALIDA]
         append_df_to_sheet(block, hoja)
         total_escritos += len(block)
         print(f"Agregados {len(block)} registros a hoja '{hoja}'")
 
 # 2) No mapeables (Externos)
-externos = df_out[~df_out['ESTABLECIMIENTO DE INSCRIPCION'].isin(ESTABLISHMENT_TO_SHEET.keys())] \
-          .drop(columns=['ESTABLECIMIENTO DE INSCRIPCION'])
+externos = df_out[~df_out['ESTABLECIMIENTO DE INSCRIPCION'].isin(ESTABLISHMENT_TO_SHEET.keys())]
 if not externos.empty:
-    externos = externos[['Nombre', 'PrimerAp', 'SegundoAp', 'RUN', 'DV', 'Sector', 'Fecha', 'Valor']]
+    externos = externos[COLUMNAS_SALIDA]
     append_df_to_sheet(externos, 'Externos')
     total_escritos += len(externos)
     print(f"Agregados {len(externos)} registros a hoja 'Externos'")
-
-# --- Limpieza opcional: eliminar archivos descargados tras procesar ---
-for file in downloaded_files:
-    try:
-        os.remove(file)
-        print(f"Archivo eliminado: {file}")
-    except Exception:
-        pass
 
 # --- Finalizar ---
 driver.quit()
