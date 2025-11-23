@@ -423,13 +423,6 @@ if not externos.empty:
     total_escritos += len(externos)
     print(f"Agregados {len(externos)} registros a hoja 'Externos'")
 
-# --- Limpieza opcional: eliminar archivos descargados tras procesar ---
-for file in downloaded_files:
-    try:
-        os.remove(file)
-        print(f"Archivo eliminado: {file}")
-    except Exception:
-        pass
 
 # --- Finalizar ---
 driver.quit()
