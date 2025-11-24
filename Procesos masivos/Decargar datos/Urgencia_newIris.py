@@ -14,6 +14,21 @@ DOWNLOAD_DIR = r"G:\Mi unidad\UrgenciaQ\Datos_newiris"
 USERNAME = "10024485-3"
 PASSWORD = "Ignavi24"
 
+REPORTS = [
+    {"url": "https://www.iris-salud.cl/ReportPortal/sql/queryView.aspx?reportId=677", "set": "urgencias"},
+    {"url": "https://www.iris-salud.cl/ReportPortal/sql/queryView.aspx?reportId=1110", "set": "urgencias"},
+    {"url": "https://www.iris-salud.cl/ReportPortal/sql/queryView.aspx?reportId=673", "set": "urgencias"},
+    {"url": "https://www.iris-salud.cl/ReportPortal/sql/queryView.aspx?reportId=520", "set": "urgencias"},
+    {"url": "https://www.iris-salud.cl/ReportPortal/sql/queryView.aspx?reportId=810", "set": "urgencias"},
+]
+
+CENTROS = [
+    {"tipo": "urgencias", "nombre": "SAR Haydeé López Casoou"},
+    {"tipo": "urgencias", "nombre": "SAPU Dr. Carlos Lorca"},
+    {"tipo": "urgencias", "nombre": "SAPU Condores de Chile"},
+    {"tipo": "urgencias", "nombre": "SAPU Santa Laura"},
+]
+
 
 def create_driver(download_dir: str = DOWNLOAD_DIR) -> webdriver.Chrome:
     os.makedirs(download_dir, exist_ok=True)
@@ -66,26 +81,18 @@ def modificar_nombre_centro(driver: webdriver.Chrome, wait: WebDriverWait, nombr
     )
 
 
-def download_reports(driver: webdriver.Chrome, wait: WebDriverWait, fecha_inicio: str, fecha_fin: str) -> List[str]:
-    reportes = [
-        {"url": "https://www.iris-salud.cl/ReportPortal/sql/queryView.aspx?reportId=677", "set": "urgencias"},
-        {"url": "https://www.iris-salud.cl/ReportPortal/sql/queryView.aspx?reportId=1110", "set": "urgencias"},
-        {"url": "https://www.iris-salud.cl/ReportPortal/sql/queryView.aspx?reportId=673", "set": "urgencias"},
-        {"url": "https://www.iris-salud.cl/ReportPortal/sql/queryView.aspx?reportId=520", "set": "urgencias"},
-        {"url": "https://www.iris-salud.cl/ReportPortal/sql/queryView.aspx?reportId=810", "set": "urgencias"},
-    ]
-
-    centros = [
-        {"tipo": "urgencias", "nombre": "SAR Haydeé López Casoou"},
-        {"tipo": "urgencias", "nombre": "SAPU Dr. Carlos Lorca"},
-        {"tipo": "urgencias", "nombre": "SAPU Condores de Chile"},
-        {"tipo": "urgencias", "nombre": "SAPU Santa Laura"},
-    ]
-
+def download_report_set(
+    driver: webdriver.Chrome,
+    wait: WebDriverWait,
+    fecha_inicio: str,
+    fecha_fin: str,
+    reportes: Optional[List[dict]] = None,
+    centros: Optional[List[dict]] = None,
+) -> List[str]:
     downloaded_files: List[str] = []
 
-    for reporte in reportes:
-        centros_filtrados = [c for c in centros if c["tipo"] == reporte["set"]]
+    for reporte in reportes or REPORTS:
+        centros_filtrados = [c for c in (centros or CENTROS) if c["tipo"] == reporte["set"]]
         time.sleep(5)
 
         for centro in centros_filtrados:
@@ -145,7 +152,9 @@ def download_reports(driver: webdriver.Chrome, wait: WebDriverWait, fecha_inicio
                         break
 
                 if not nuevo_archivo:
-                    print("No se encontró ningún archivo .xlsx en el directorio de descargas tras esperar.")
+                    print(
+                        "No se encontró ningún archivo .xlsx en el directorio de descargas tras esperar."
+                    )
                     driver.close()
                     driver.switch_to.window(driver.window_handles[0])
                     continue
@@ -155,6 +164,17 @@ def download_reports(driver: webdriver.Chrome, wait: WebDriverWait, fecha_inicio
                 driver.switch_to.window(driver.window_handles[0])
 
     return downloaded_files
+
+
+def download_reports(
+    driver: webdriver.Chrome,
+    wait: WebDriverWait,
+    fecha_inicio: str,
+    fecha_fin: str,
+    reportes: Optional[List[dict]] = None,
+    centros: Optional[List[dict]] = None,
+) -> List[str]:
+    return download_report_set(driver, wait, fecha_inicio, fecha_fin, reportes, centros)
 
 
 def run(fecha_inicio: str, fecha_fin: str, driver: Optional[webdriver.Chrome] = None) -> List[str]:
