@@ -1,5 +1,4 @@
 
-from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
@@ -9,63 +8,27 @@ import os
 import pandas as pd
 import sys
 
+import Urgencia_newIris
+
 # --- Recibir fechas desde argumentos ---
-#if len(sys.argv) != 3:
-#    print("Uso: script.py <fecha_inicio> <fecha_fin>")
-#    sys.exit(1)
-#
-#fecha_inicio = sys.argv[1]
-#fecha_fin = sys.argv[2]
-#
-#print(f"Usando fechas: {fecha_inicio} - {fecha_fin}")
+if len(sys.argv) != 3:
+    print("Uso: script.py <fecha_inicio> <fecha_fin>")
+    sys.exit(1)
 
-fecha_inicio = "10/11/2025"
-fecha_fin = "16/11/2025"
+fecha_inicio = sys.argv[1]
+fecha_fin = sys.argv[2]
 
-
-
+print(f"Usando fechas: {fecha_inicio} - {fecha_fin}")
 
 # --- Configuración del directorio de descargas ---
 download_dir = r"G:\Mi unidad\Actividades\Datosp4"
 if not os.path.exists(download_dir):
     os.makedirs(download_dir)
 
-# Configuración del driver con opciones para establecer el directorio de descargas
-options = webdriver.ChromeOptions()
-prefs = {
-    "download.default_directory": download_dir,
-    "download.prompt_for_download": False,
-    "download.directory_upgrade": True,
-    "safebrowsing.enabled": True,
-    "credentials_enable_service": False,
-    "profile.password_manager_enabled": False
-}
-options.add_experimental_option("prefs", prefs)
-driver = webdriver.Chrome(options=options)
-
-# --- Inicio de sesión en la página ---
-driver.get("https://iris.rayenaps.cl/")
-wait = WebDriverWait(driver, 30)
-
-# Ingresar usuario
-username_input = wait.until(EC.presence_of_element_located((By.ID, "mui-1")))
-username_input.clear()
-time.sleep(2)
-#username_input.send_keys("14092485-7")
-username_input.send_keys("10024485-3")
-
-# Ingresar contraseña
-password_input = wait.until(EC.presence_of_element_located((By.ID, "mui-3")))
-password_input.clear()
-time.sleep(2)
-#password_input.send_keys("David.2025")
-password_input.send_keys("Ignavi24")
-
-# Clic en "Ingresar"
-ingresar_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[contains(text(),'Ingresar')]")))
-time.sleep(2)
-ingresar_button.click()
-#time.sleep(2)
+# --- Driver y login centralizado ---
+driver = Urgencia_newIris.create_driver(download_dir)
+wait = WebDriverWait(driver, 150)
+Urgencia_newIris.login(driver, wait, Urgencia_newIris.USERNAME, Urgencia_newIris.PASSWORD)
 
 # Seleccionar licencia
 #select_div = wait.until(EC.element_to_be_clickable(
