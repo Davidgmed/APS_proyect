@@ -158,7 +158,7 @@ for centro_info in centros:
     menu_item_excel.click()
 
     # Espera activa para detectar el nuevo archivo .xlsx
-    timeout = 60  # segundos de espera máxima
+    timeout = 1000  # segundos de espera máxima
     elapsed = 0
     nuevo_archivo = None
     while elapsed < timeout:

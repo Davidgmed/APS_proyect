@@ -59,10 +59,10 @@ def login(driver: webdriver.Chrome, wait: WebDriverWait, username: str, password
     password_input.send_keys(password)
 
     ingresar_button = wait.until(
-        EC.element_to_be_clickable((By.XPATH, "//button[contains(text(),'Ingresar')"]))
+        EC.element_to_be_clickable((By.XPATH, "//button[contains(text(),'Ingresar')]"))
     )
     ingresar_button.click()
-    time.sleep(30)
+    time.sleep(4)
 
 
 def modificar_fechas(driver: webdriver.Chrome, wait: WebDriverWait, nombre_campo: str, valor: str) -> None:
@@ -103,7 +103,7 @@ def download_report_set(
                 driver.get(reporte["url"])
                 archivos_previos = set(os.listdir(DOWNLOAD_DIR))
 
-                time.sleep(30)
+                time.sleep(5)
                 modificar_fechas(driver, wait, "txt4", fecha_inicio)
                 modificar_fechas(driver, wait, "txt5", fecha_fin)
 
@@ -134,7 +134,7 @@ def download_report_set(
                 )
                 menu_item_excel.click()
 
-                timeout = 3000
+                timeout = 1000
                 elapsed = 0
                 nuevo_archivo: Optional[str] = None
                 while elapsed < timeout:
