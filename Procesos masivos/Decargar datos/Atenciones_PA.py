@@ -31,24 +31,30 @@ client = gspread.authorize(credentials)
 spreadsheet = client.open("Casos presion arterial descompensada")
 
 
+worksheet_cache = {}
+
+
 def open_or_create_worksheet(spreadsheet_obj, title: str):
     """Abre una hoja por título o la crea si no existe."""
+    if title in worksheet_cache:
+        return worksheet_cache[title], False
+
     try:
-        return spreadsheet_obj.worksheet(title)
+        worksheet_cache[title] = spreadsheet_obj.worksheet(title)
+        return worksheet_cache[title], False
     except gspread.WorksheetNotFound:
-        return spreadsheet_obj.add_worksheet(title=title, rows=1000, cols=20)
+        worksheet_cache[title] = spreadsheet_obj.add_worksheet(title=title, rows=1000, cols=20)
+        return worksheet_cache[title], True
 
 
 def append_df_to_sheet(df, sheet_name):
     """Función para agregar datos a una hoja específica en Google Sheets."""
-    worksheet = open_or_create_worksheet(spreadsheet, sheet_name)
-    existing_data = worksheet.get_all_values()
-    if not existing_data:
-        worksheet.append_row(list(df.columns))  # si está vacía, escribir encabezados
-    start_row = len(existing_data) + 1
+    worksheet, is_new = open_or_create_worksheet(spreadsheet, sheet_name)
     rows = df.values.tolist()
+    if is_new:
+        worksheet.append_row(list(df.columns))
     if rows:
-        worksheet.append_rows(rows, table_range=f"A{start_row}")
+        worksheet.append_rows(rows, value_input_option='USER_ENTERED')
 
 
 # ====================== PROCESAMIENTO & CARGA A GOOGLE SHEETS =================
