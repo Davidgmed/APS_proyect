@@ -9,9 +9,9 @@ import sys
 from pathlib import Path
 
 SCRIPTS = [
-    #("Atenciones_HGT.py", "hemoglucotest"),
+    ("Atenciones_HGT.py", "hemoglucotest"),
     ("Atenciones_PA.py", "presión arterial"),
-    #("Atenciones_respiratorias.py", "casos respiratorios"),
+    ("Atenciones_respiratorias.py", "casos respiratorios"),
 ]
 
 
