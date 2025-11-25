@@ -66,19 +66,13 @@ def login(driver: webdriver.Chrome, wait: WebDriverWait, username: str, password
 
 
 def modificar_fechas(driver: webdriver.Chrome, wait: WebDriverWait, nombre_campo: str, valor: str) -> None:
-    wait.until(EC.visibility_of_element_located((By.NAME, nombre_campo)))
-    driver.execute_script(
-        "document.querySelector('input[name=\"{}\"]').setAttribute('value', arguments[0]);".format(nombre_campo),
-        valor,
-    )
+    campo = wait.until(EC.visibility_of_element_located((By.NAME, nombre_campo)))
+    driver.execute_script("arguments[0].setAttribute('value', arguments[1]);", campo, valor)
 
 
 def modificar_nombre_centro(driver: webdriver.Chrome, wait: WebDriverWait, nombre_campo: str, valor: str) -> None:
-    wait.until(EC.visibility_of_element_located((By.NAME, nombre_campo)))
-    driver.execute_script(
-        "document.querySelector('input[name=\"{}\"]').setAttribute('value', arguments[0]);",
-        valor,
-    )
+    campo = wait.until(EC.visibility_of_element_located((By.NAME, nombre_campo)))
+    driver.execute_script("arguments[0].setAttribute('value', arguments[1]);", campo, valor)
 
 
 def download_report_set(
