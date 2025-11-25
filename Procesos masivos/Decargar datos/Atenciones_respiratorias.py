@@ -46,14 +46,19 @@ establishment_to_sector = {
     'Centro Comunitario de Rehabilitación El Bosque': 'Sector 0',
     'Centro Especialidad el Bosque': 'Sector 0'
 }
+worksheet_cache = {}
+
+
+def get_worksheet(sheet_name):
+    if sheet_name not in worksheet_cache:
+        worksheet_cache[sheet_name] = spreadsheet.worksheet(sheet_name)
+    return worksheet_cache[sheet_name]
 
 
 def append_df_to_sheet(df, sheet_name):
-    worksheet = spreadsheet.worksheet(sheet_name)
-    existing_data = worksheet.get_all_values()
-    start_row = len(existing_data) + 1
+    worksheet = get_worksheet(sheet_name)
     rows = df.values.tolist()
-    worksheet.append_rows(rows, table_range=f"A{start_row}")
+    worksheet.append_rows(rows, value_input_option='USER_ENTERED')
 
 
 def list_downloaded_reports(folder: str):
