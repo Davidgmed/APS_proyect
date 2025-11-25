@@ -178,6 +178,8 @@ def consolidate_pa(all_frames: List[pd.DataFrame]) -> pd.DataFrame:
         'Criterio 3: >=140/90': 3,
         'Sin alerta': 0
     })
+    # ⬇️ Aquí filtras los que SÍ tienen alerta
+    grouped = grouped[grouped['AlertaN'] > 0]
 
     grouped = grouped.sort_values(by=['AlertaN', 'PAS', 'PAD'], ascending=[False, False, False])
 
