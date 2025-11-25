@@ -182,7 +182,7 @@ def consolidate_pa(all_frames: List[pd.DataFrame]) -> pd.DataFrame:
     grouped = grouped.sort_values(by=['AlertaN', 'PAS', 'PAD'], ascending=[False, False, False])
 
     columnas_salida = [
-        'FechaCarga', 'CentroAtencion', 'Sector', 'RUT', 'Fecha', 'PAS', 'PAD', 'Alerta'
+        'FechaCarga', 'CentroAtencion', 'Sector','NOMBRE','PRIMER APELLIDO','SEGUNDO APELLIDO','RUT', 'Fecha', 'PAS', 'PAD', 'Alerta'
     ]
     return grouped[columnas_salida]
 
