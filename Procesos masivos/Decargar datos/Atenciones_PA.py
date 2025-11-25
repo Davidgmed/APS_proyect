@@ -142,7 +142,7 @@ def consolidate_pa(all_frames: List[pd.DataFrame]) -> pd.DataFrame:
 
     data = pd.concat(all_frames, ignore_index=True)
 
-    for col in ['RUN', 'DV', 'ESTABLECIMIENTO', 'SECTOR PACIENTE', 'PRESION ARTERIAL', 'FECHA ATENCION']:
+    for col in ['RUN', 'DV', 'ESTABLECIMIENTO', 'SECTOR PACIENTE', 'PRESION ARTERIAL', 'FECHA ATENCION', 'NOMBRE','PRIMER APELLIDO','SEGUNDO APELLIDO']:
         if col in data.columns:
             data[col] = data[col].astype(str).str.strip()
 
@@ -157,7 +157,7 @@ def consolidate_pa(all_frames: List[pd.DataFrame]) -> pd.DataFrame:
     data = data.dropna(subset=['PAS', 'PAD', 'FECHA ATENCION', 'RUT'])
 
     grouped = data.groupby(
-        ['RUT', 'FECHA ATENCION', 'ESTABLECIMIENTO', 'SECTOR PACIENTE'],
+        ['RUT', 'FECHA ATENCION', 'ESTABLECIMIENTO', 'SECTOR PACIENTE', 'NOMBRE','PRIMER APELLIDO','SEGUNDO APELLIDO'],
         as_index=False
     ).agg({
         'PAS': 'max',

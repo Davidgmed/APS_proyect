@@ -17,7 +17,7 @@ print(f"📅 Fecha fin: {fecha_fin_str}")
 
 scripts = [
     "login_unico.py",
-    "Actividades_newIris.py",
+    "Actividades_newIris.py"#,
     "Glicosiladas_newIris.py",
     "Urgencia_newIris.py",
     "Urgencia_newIris_poli.py",

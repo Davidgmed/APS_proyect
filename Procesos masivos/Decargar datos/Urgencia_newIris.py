@@ -15,7 +15,7 @@ USERNAME = "10024485-3"
 PASSWORD = "Ignavi24"
 
 REPORTS = [
-    {"url": "https://www.iris-salud.cl/ReportPortal/sql/queryView.aspx?reportId=677", "set": "urgencias"},
+    {"url": "https://www.iris-salud.cl/ReportPortal/sql/queryView.aspx?reportId=677", "set": "urgencias"}, #informeatencionesurgencia
     {"url": "https://www.iris-salud.cl/ReportPortal/sql/queryView.aspx?reportId=1110", "set": "urgencias"},
     {"url": "https://www.iris-salud.cl/ReportPortal/sql/queryView.aspx?reportId=673", "set": "urgencias"},
     {"url": "https://www.iris-salud.cl/ReportPortal/sql/queryView.aspx?reportId=520", "set": "urgencias"},

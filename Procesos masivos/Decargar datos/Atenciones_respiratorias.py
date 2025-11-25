@@ -135,11 +135,6 @@ def main():
     if not df_externos.empty:
         append_df_to_sheet(df_externos, 'Externos')
 
-    for file in downloaded_files:
-        if os.path.exists(file):
-            os.remove(file)
-            print(f"Archivo eliminado: {file}")
-
     print("Proceso completado exitosamente!")
 
 
