@@ -2,13 +2,13 @@ import subprocess
 import sys
 
 scripts = [
-    "Actividades_folder_bulk.py",
+    #"Actividades_folder_bulk.py",
     "Admitidos_folder_bulk.py",
-    "dm_folder_bulk2.py",
+    #"dm_folder_bulk2.py",
     "Ges_folder_bulk.py",
-    "hba1c_folder_bulk.py",
-    "hta_folder_bulk.py",
-    "Policonsultantes_folder_bulk.py",
+    #"hba1c_folder_bulk.py",
+    #"hta_folder_bulk.py",
+    #"Policonsultantes_folder_bulk.py",
     "Tiempos_folder_bulk.py"
     #"sm_folder_bulk.py"
 ]

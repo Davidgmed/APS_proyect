@@ -3,6 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import TimeoutException
 import time
 import os
 import pandas as pd
@@ -52,20 +53,49 @@ time.sleep(15)
 
 # --- Función para modificar el campos ---
 
+
+def _wait_for_input(driver, wait, locator):
+    """Busca un input visible en el documento principal o dentro de iframes."""
+
+    try:
+        return wait.until(EC.visibility_of_element_located(locator))
+    except TimeoutException:
+        pass
+
+    frames = driver.find_elements(By.TAG_NAME, "iframe")
+    for frame in frames:
+        driver.switch_to.default_content()
+        driver.switch_to.frame(frame)
+        try:
+            return WebDriverWait(driver, 30).until(
+                EC.visibility_of_element_located(locator)
+            )
+        except TimeoutException:
+            continue
+        finally:
+            driver.switch_to.default_content()
+
+    raise TimeoutException(
+        f"No se encontró el elemento con locator {locator} en el documento ni en iframes"
+    )
+
+
 def modificar_fechas(driver, wait, nombre_campo, valor):
     # Espera a que el elemento con el atributo name igual a nombre_campo sea visible
-    input_element = wait.until(EC.visibility_of_element_located((By.NAME, nombre_campo)))
+    input_element = _wait_for_input(driver, wait, (By.NAME, nombre_campo))
     # Utiliza execute_script para asignar el nuevo valor al input
     driver.execute_script(
-        "document.querySelector('input[name=\"{}\"]').setAttribute('value', arguments[0]);".format(nombre_campo),
+        "arguments[0].setAttribute('value', arguments[1]);",
+        input_element,
         valor
     )
 
 
 def modificar_nombre_centro(driver, wait, centro_info):
-    input_element = wait.until(EC.visibility_of_element_located((By.NAME, "txt3")))
+    input_element = _wait_for_input(driver, wait, (By.NAME, "txt3"))
     driver.execute_script(
-        "document.querySelector('input[name=\"txt3\"]').setAttribute('value', arguments[0]);",
+        "arguments[0].setAttribute('value', arguments[1]);",
+        input_element,
         centro_info['nombre']
     )
 

@@ -36,9 +36,9 @@ def main():
         driver.quit()
 
     print("Procesando reportes descargados...")
-    Atenciones_HGT.main()
-    Atenciones_PA.main()
-    Atenciones_respiratorias.main()
+    #Atenciones_HGT.main()
+    #Atenciones_PA.main()
+    #Atenciones_respiratorias.main()
 
 
 if __name__ == "__main__":
